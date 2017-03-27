@@ -8,10 +8,10 @@ Simple Python utilities to show how to send and receive messages to/from RabbitM
 Requirements
 ============
 
-A Docker image `beniji/rabbit-python` is available so you can run directly in Docker:
+A Docker image `beniji/rabbit-python-util` is available so you can run directly in Docker:
 
 ```
-docker run --rm --net host beniji/rabbit-python rabbit-send.py  --exchange testexchange --message "hello"
+docker run --rm --net host beniji/rabbit-python-util rabbit-send.py  --exchange testexchange --message "hello"
 ```
 
 Or to install manually (requires Python 3) just do `pip3 install -r requirements.txt`.
