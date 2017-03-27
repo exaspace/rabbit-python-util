@@ -5,7 +5,7 @@
 
 REGISTRY=  beniji
 IMAGE    = rabbit-python-util
-VERSION  = $(shell git rev-parse --short HEAD)
+VERSION  = $(shell git describe)
 
 DOCKER=$(shell docker info >/dev/null 2>&1 && echo "docker" || echo "sudo docker")
 
