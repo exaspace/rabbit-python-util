@@ -2,7 +2,9 @@
 # RabbitMQ send & receive demo in Python
 
 
-Simple Python utilities to show how to send and receive messages to/from RabbitMQ using the `pika` Python library (code is written for Python 3).
+Simple Python utilities to send and receive messages to/from RabbitMQ using the `pika` Python library (written in Python 3).
+
+Useful for basic load testing and verification of RabbitMQ behaviour.
 
 
 Requirements
@@ -14,29 +16,32 @@ A Docker image `beniji/rabbit-python-util` is available so you can run directly 
 docker run --rm --net host beniji/rabbit-python-util rabbit-send.py  --exchange testexchange --message "hello"
 ```
 
-Or to install manually (requires Python 3) just do `pip3 install -r requirements.txt`.
+To install manually (requires Python 3 with pip) just do `pip3 install -r requirements.txt`.
 
 
 
 Sending messages
 ================
 
-To send a message "hello" to RabbitMQ (the exchange "testexchange" must have been already setup in the server - see below for how to create exchanges):
+In RabbitMQ parlance, messages are sent to an "exchange". Normally you set an exchange up in the server before sending messages
+to it, but for convenience rabbit-send.py can also declare the exchange for you.
+
+To send a message to an existing RabbitMQ exchange "testexchange"
 
 ```
 ./rabbit-send.py --exchange testexchange --message "hello"
 ```
 
-To send a message to RabbitMQ and also declare a queue (durable in this case) and bind it to an exchange in the one step:
+To send a message to a new RabbitMQ exchange which will be declared automatically use the `--declare` option
 
 ```
-./rabbit-send.py --exchange testexchange --queue testqueue --durable --message "hello"
+./rabbit-send.py --exchange testexchange --declare --message "hello"
 ```
 
-Same as above but declaring a non-durable queue (just omit the `--durable` argument):
+Same as above but declaring a different exchange type ("direct" is the default value, and here we choose "topic" instead)
 
 ```
-./rabbit-send.py --exchange testexchange --queue testqueue --message "hello"
+./rabbit-send.py --exchange testexchange --declare --type topic --message "hello"
 ```
 
 To see all options run
@@ -49,17 +54,31 @@ To see all options run
 Receiving messages (just prints out each message)
 =================================================
 
-Listen for messages from a Rabbit queue
+Listen for messages on an existing Rabbit queue "testqueue"
 
 ```
 ./rabbit-receive.py --queue testqueue
+```
+
+Listen for messages on an existing exchange "testexchange" (creates an anonymous queue and binds it to the exchange):
+
+```
+./rabbit-receive.py --exchange testexchange
+```
+
+Create and bind a queue called "testqueue" to an existing exchange "testexchange" and listen for messages on that queue:
+
+```
+./rabbit-receive.py --exchange testexchange --queue testqueue
 ```
 
 
 Sending messages for performance testing
 ========================================
 
-Use the `--count X` and `--delay_ms Y` arguments to send X messages with a delay of Y milliseconds in between each send call. Note that this will append the index of the current message to the message body itself.
+Use the `--count X` and `--delay_ms Y` arguments to send/consume X messages with a delay of Y milliseconds in between each message.
+
+Note that when `--count` is used, rabbit-send will append the index of the current message to the message body itself.
 
 
 Running and administering RabbitMQ server
@@ -86,18 +105,18 @@ docker exec rabbit rabbitmqctl list_queues
 2. Download the `rabbitmqadmin` python utility which you need to administer the server (you can grab this from your running container). Copy rabbitmqadmin into your local bin directory (your host machine will require python)
 
 ```
+mkdir -p ~/bin
 curl -o ~/bin/rabbitmqadmin localhost:15672/cli/rabbitmqadmin && chmod +x ~/bin/rabbitmqadmin
 ```
 
 3. Create an exchange (in this case a topic)
 
 ```
-rabbitmqadmin declare exchange --vhost=/ name=testexchange type=topic
+~/bin/rabbitmqadmin declare exchange --vhost=/ name=testexchange type=topic
 ```
 
 Using git configuration
 -----------------------
 
 An alternative way to run a RabbitMQ docker container is to place the Rabbit MQ server definitions JSON in source control and then bind mount that into the container. This way you can ensure the server creates your exchanges etc. at boot up time.
-
 
