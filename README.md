@@ -44,6 +44,14 @@ Same as above but declaring a different exchange type ("direct" is the default v
 ./rabbit-send.py --exchange testexchange --declare --type topic --message "hello"
 ```
 
+Send 1000 messages at the rate of 10 per second
+
+```
+./rabbit-send.py --exchange testexchange --message "hello" --count 1000 --delay_ms 100
+```
+
+Use `--routing_key` to specify a routing key.
+
 To see all options run
 
 ```
@@ -54,23 +62,32 @@ To see all options run
 Receiving messages (just prints out each message)
 =================================================
 
-Listen for messages on an existing Rabbit queue "testqueue"
+Listen for messages on an existing Rabbit queue "testqueue" (use this for round-robin type messaging)
 
 ```
 ./rabbit-receive.py --queue testqueue
 ```
 
-Listen for messages on an existing exchange "testexchange" (creates an anonymous queue and binds it to the exchange):
+Listen for messages on an existing exchange "testexchange" (creates an anonymous queue and binds it to the exchange so
+use this for pub-sub type messaging):
 
 ```
 ./rabbit-receive.py --exchange testexchange
 ```
 
-Create and bind a queue called "testqueue" to an existing exchange "testexchange" and listen for messages on that queue:
+Create and bind a new queue called "testqueue" to an existing exchange "testexchange" and listen for messages on that queue:
 
 ```
 ./rabbit-receive.py --exchange testexchange --queue testqueue
 ```
+
+Consume 1000 messages at the rate of 10 per second
+
+```
+./rabbit-receive.py --exchange testexchange --count 1000 --delay_ms 100
+```
+
+Use `--routing_key` to specify a routing key.
 
 
 Sending messages for performance testing
@@ -81,15 +98,10 @@ Use the `--count X` and `--delay_ms Y` arguments to send/consume X messages with
 Note that when `--count` is used, rabbit-send will append the index of the current message to the message body itself.
 
 
-Running and administering RabbitMQ server
-=========================================
+Running RabbitMQ server
+=======================
 
-Some tips on easily running and configuring a Rabbit server locally for testing (using Docker).
-
-Manual way
-----------
-
-1. Run a rabbit server called `rabbit` and expose the ports you need
+You can easily run and configure a RabbitMQ server locally for testing using Docker.
 
 ```
 docker run --name rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
@@ -102,21 +114,20 @@ docker exec rabbit rabbitmqctl list_exchanges
 docker exec rabbit rabbitmqctl list_queues
 ```
 
-2. Download the `rabbitmqadmin` python utility which you need to administer the server (you can grab this from your running container). Copy rabbitmqadmin into your local bin directory (your host machine will require python)
+Fetch the `rabbitmqadmin` python utility from the running container which you can then use
+ to administer the server (your host machine will require python of course).
 
 ```
 mkdir -p ~/bin
 curl -o ~/bin/rabbitmqadmin localhost:15672/cli/rabbitmqadmin && chmod +x ~/bin/rabbitmqadmin
 ```
 
-3. Create an exchange (in this case a topic)
+Create an exchange (in this case with type "topic")
 
 ```
 ~/bin/rabbitmqadmin declare exchange --vhost=/ name=testexchange type=topic
 ```
 
-Using git configuration
------------------------
-
-An alternative way to run a RabbitMQ docker container is to place the Rabbit MQ server definitions JSON in source control and then bind mount that into the container. This way you can ensure the server creates your exchanges etc. at boot up time.
+An way to automate the configuration of a RabbitMQ docker container is to place the Rabbit MQ server definitions JSON on your
+local file system and then bind mount that into the container. This ensures the server creates your exchanges etc. at boot up time.
 
