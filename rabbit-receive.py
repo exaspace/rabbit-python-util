@@ -59,7 +59,7 @@ def callback(ch, method, properties, body):
     if args.delay_ms > 0:
         time.sleep(args.delay_ms * 0.001)
 
-
+print("Starting rabbit consume...")
 channel.basic_consume(callback, queue=queue_name, no_ack=False)
 channel.start_consuming()
 connection.close()
