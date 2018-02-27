@@ -3,7 +3,7 @@
 
 # To build the image into your local docker cache run `make latest`
 
-REGISTRY=  beniji
+REGISTRY=  exaspace
 IMAGE    = rabbit-python-util
 VERSION  = $(shell git describe)
 
