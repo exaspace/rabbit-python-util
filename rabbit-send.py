@@ -7,7 +7,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--host', type=str, default='localhost')
 parser.add_argument('--exchange', type=str)
 parser.add_argument('--routing_key', type=str, default='')
-parser.add_argument('--message', type=str)
+parser.add_argument('--message', type=str, help="""
+    The message text to send, or if prefixed with '@' symbol, a filename containing the message text
+                    """)
 parser.add_argument('--count', type=int, default=1, help="""
     Number of messages to send. Will append an incrementing integer to each message""")
 parser.add_argument('--delay_ms', type=int, default=0, help="""
@@ -37,12 +39,16 @@ if args.declare:
 else:
     channel.exchange_declare(exchange=args.exchange, passive=True)
 
+if "@" == args.message[0]:
+    filename = args.message[1:]
+    with open(filename, 'r') as fd:
+        message_template = fd.read()
+else:
+    message_template = args.message
+
 for i in range(1, args.count + 1):
 
-    if args.count == 1:
-        body = args.message
-    else:
-        body = "{}{}".format(args.message, i)
+    body = message_template.replace("@COUNT@", str(i))
 
     channel.basic_publish(
         exchange=args.exchange,
@@ -51,9 +57,14 @@ for i in range(1, args.count + 1):
         properties=pika.BasicProperties(delivery_mode = 2)) # persistent
 
     if args.summary:
-        print("{} {}".format(i, body), end='\r', flush=True)
+        if i != args.count:
+            end = "\r"
+        else:
+            end = "\n"
+        sys.stdout.write("Progress: {}{}".format(i, end))
+        sys.stdout.flush()
     else:
-        print("{} {}".format(i, body))
+        print("{}".format(i))
 
     if args.delay_ms > 0:
         time.sleep(args.delay_ms/1000.0)
