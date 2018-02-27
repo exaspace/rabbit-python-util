@@ -2,12 +2,11 @@
 # RabbitMQ send & receive demo in Python
 
 
-Simple Python utilities to send and receive messages to/from RabbitMQ using the `pika` Python library (written in Python 3). Public docker image available (`exaspace/rabbit-python-util`).
+Simple Python utilities to send and receive messages to/from RabbitMQ using the `pika` Python library (written in Python 3). Docker image available (`docker pull exaspace/rabbit-python-util`).
 
 Try it!
 
-    docker run exaspace/rabbit-python-util rabbit-send.py --help
-    docker run exaspace/rabbit-python-util rabbit-receive.py --help
+    docker run --rm --net host exaspace/rabbit-python-util rabbit-send.py --help
 
 
 Sending messages
@@ -93,19 +92,21 @@ Use the `--count X` and `--delay_ms Y` arguments to send/consume X messages with
 Note that when `--count` is used, rabbit-send will append the index of the current message to the message body itself.
 
 
-Docker
-======
+Installation (Docker)
+=====================
 
 ```
-docker run --rm --net host exaspace/rabbit-python-util \
-    rabbit-send.py  --exchange testexchange --message "hello"
+    alias rabbit-send.py='docker run --rm --net host exaspace/rabbit-python-util rabbit-send.py'
+    alias rabbit-receive.py='docker run --rm --net host exaspace/rabbit-python-util rabbit-receive.py'
 ```
 
+Then `rabbit-send.py  --help` should work.
 
-Installation
-============
 
-To install natively (requires Python 3 with pip)
+Installation (Native)
+=====================
+
+To install natively (requires Python 3 with pip), clone this repo then from the top level:
 
     pip3 install -r requirements.txt
     ./rabbit-send.py --help
