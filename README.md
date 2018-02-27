@@ -89,7 +89,7 @@ Sending messages for performance testing
 
 Use the `--count X` and `--delay_ms Y` arguments to send/consume X messages with a delay of Y milliseconds in between each message.
 
-Note that when `--count` is used, rabbit-send will append the index of the current message to the message body itself.
+Note that if the magic string "@COUNT@" occurs in your message body, it will be replaced by the index of the current message.
 
 
 Installation (Docker)
