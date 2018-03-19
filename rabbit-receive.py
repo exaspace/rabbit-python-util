@@ -2,10 +2,23 @@
 
 import pika, sys, time
 import argparse, pprint
+import ssl
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--host', type=str, default='localhost')
+parser.add_argument('--port', type=int, default=5672)
+parser.add_argument('--vhost', type=str, default='/')
+
+parser.add_argument('--username', type=str, default="guest")
+parser.add_argument('--password', type=str, default="guest")
+parser.add_argument('--ssl', action='store_true')
+parser.add_argument('--cacert', type=str, default=None)
+
 parser.add_argument('--queue', type=str)
+
 parser.add_argument('--exchange', type=str, help="""
     Create an anonymous queue bound to this exchange and consume (use for pubsub)""")
 parser.add_argument('--durable', default=False, action='store_true', help="""
@@ -23,7 +36,26 @@ if not args.queue and not args.exchange:
     parser.print_help()
     sys.exit(1)
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(args.host))
+if args.ssl:
+    ssl_options= dict(
+            ssl_version=ssl.PROTOCOL_TLSv1_2,
+            ca_certs=args.cacert,
+            cert_reqs=ssl.CERT_NONE) # TODO allow cert validation
+else:
+    ssl_options = None
+
+credentials = pika.credentials.PlainCredentials(args.username, args.password)
+
+connect_dict = {}
+connect_dict['host'] = args.host
+connect_dict['port'] = args.port
+connect_dict['virtual_host'] = args.vhost
+connect_dict['ssl'] = args.ssl
+connect_dict['ssl_options'] = ssl_options
+connect_dict['credentials'] = credentials
+
+connection_params = pika.ConnectionParameters(**connect_dict)
+connection = pika.BlockingConnection(connection_params)
 channel = connection.channel()
 
 if args.exchange is not None and args.queue is not None:
