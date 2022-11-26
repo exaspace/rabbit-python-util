@@ -40,7 +40,7 @@ def parse_args():
         Print only a single line summary of progress (instead of printing each message)""")
 
     parser.add_argument('--routing_key', type=str, default='', help="""
-        
+
         If binding to an exchange, use this routing key""")
 
     args = parser.parse_args()
@@ -79,7 +79,7 @@ if args.exchange is not None and args.queue is not None:
     queue_name = args.queue
 elif args.exchange is not None:
     print("Declaring exclusive queue")
-    result = channel.queue_declare(exclusive=True, auto_delete=True)
+    result = channel.queue_declare(queue="", exclusive=True, auto_delete=True)
     queue_name = result.method.queue
     print("Binding queue to exchange {} with routing key {}".format(args.exchange, args.routing_key))
     channel.queue_bind(exchange=args.exchange, queue=queue_name, routing_key=args.routing_key)

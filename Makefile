@@ -1,7 +1,6 @@
-# This file is only needed to build/publish a docker image for this project
-# If you have python & pip installed, you can instead just run the code directly.
-
-# To build the image into your local docker cache run `make latest`
+# This file is only needed to build a docker image for this project
+# If you have python3 & pip installed, you can instead just run the code directly.
+# To build the image into your local docker cache run `make latest`.
 
 REGISTRY=  exaspace
 IMAGE    = rabbit-python-util

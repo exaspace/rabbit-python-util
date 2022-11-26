@@ -1,8 +1,40 @@
 
-# RabbitMQ send & receive demo in Python
+# RabbitMQ send & receive in Python
 
 
-Simple Python utilities to send and receive messages to/from RabbitMQ using the `pika` Python library (written in Python 3). 
+Simple Python utilities to send and receive messages to/from RabbitMQ using the `pika` Python library. 
+
+Useful for basic performance testing and demonstrations of RabbitMQ and Pika usage.
+
+Send 100 templated string messages:
+
+    ./rabbit-send.py  --exchange testexchange --message "hello @COUNT@" --count 100
+
+Receive messages:
+
+    ./rabbit-receive.py --exchange testexchange 
+
+
+## Demo
+
+Install in a new virtualenv
+
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+
+
+Start a local RabbitMQ server (admin site will be accessible at `http://localhost:15672/`)
+
+    docker compose up -d
+
+Sending messages every second to a durable exchange called 'testexchange')
+
+    ./rabbit-send.py  --exchange testexchange --message "hello @COUNT@" --delay_ms 1000 --declare --durable --count 1000
+
+In another window, start consuming from 'testexchange':
+
+    ./rabbit-receive.py --exchange testexchange  --queue testqueue --durable
 
 
 Sending messages
@@ -58,8 +90,7 @@ Listen for messages on an existing Rabbit queue "testqueue" (use this for round-
 ./rabbit-receive.py --queue testqueue
 ```
 
-Listen for messages on an existing exchange "testexchange" (creates an anonymous queue and binds it to the exchange so
-use this for pub-sub type messaging):
+Listen for messages on an existing exchange "testexchange" (creates an anonymous queue and binds it to the exchange so you can use this for pub-sub type messaging):
 
 ```
 ./rabbit-receive.py --exchange testexchange
@@ -88,58 +119,35 @@ Use the `--count X` and `--delay_ms Y` arguments to send/consume X messages with
 Note that if the magic string "@COUNT@" occurs in your message body, it will be replaced by the index of the current message.
 
 
-Installation (Docker)
-=====================
-
-```
-    alias rabbit-send.py='docker run --rm --net host exaspace/rabbit-python-util rabbit-send.py'
-    alias rabbit-receive.py='docker run --rm --net host exaspace/rabbit-python-util rabbit-receive.py'
-```
-
-Then `rabbit-send.py  --help` should work.
-
-
-Installation (Native)
-=====================
-
-To install natively (requires Python 3 with pip), clone this repo then from the top level:
-
-    pip3 install -r requirements.txt
-    ./rabbit-send.py --help
-
-
 
 Running a local RabbitMQ server
 ===============================
 
-You can easily run and configure a RabbitMQ server locally for testing using Docker.
+Either run `docker compose up -d` in this project's directory. 
+
+The RabbitMQ UI is available at `http://localhost:15672/`.
+
+To list exchanges and queues (you'll have none initially) you can run the `rabbitmqctl` tool inside the container:
 
 ```
-docker run --name rabbit -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+docker compose exec rabbitmq rabbitmqctl list_exchanges
+docker compose exec rabbitmq rabbitmqctl list_queues
 ```
 
-Test it's working by listing exchanges and queues (you'll have none initially):
-
-```
-docker exec rabbit rabbitmqctl list_exchanges
-docker exec rabbit rabbitmqctl list_queues
-```
-
-Fetch the `rabbitmqadmin` python utility from the running container which you can then use
+You can also fetch the `rabbitmqadmin` python utility from the running container which you can then use
  to administer the server (your host machine will require python of course).
 
 ```
-mkdir -p ~/bin
-curl -o ~/bin/rabbitmqadmin localhost:15672/cli/rabbitmqadmin && chmod +x ~/bin/rabbitmqadmin
+curl -o ./rabbitmqadmin localhost:15672/cli/rabbitmqadmin && chmod +x ./rabbitmqadmin
 ```
 
-Create an exchange (in this case with type "topic")
+Use the admin utility to create an exchange (in this case with type "topic")
 
 ```
-~/bin/rabbitmqadmin declare exchange --vhost=/ name=testexchange type=topic
+./rabbitmqadmin declare exchange --vhost=/ name=testexchange type=topic
 ```
 
-An way to automate the configuration of a RabbitMQ docker container is to place the Rabbit MQ server
+A way to automate the configuration of a RabbitMQ docker container is to place the Rabbit MQ server
  definitions JSON on your local file system and then bind mount that into the container. This ensures
  the server creates your exchanges etc. at boot up time.
 
