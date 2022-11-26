@@ -2,11 +2,7 @@
 # RabbitMQ send & receive demo in Python
 
 
-Simple Python utilities to send and receive messages to/from RabbitMQ using the `pika` Python library (written in Python 3). Docker image available (`docker pull exaspace/rabbit-python-util`).
-
-Try it!
-
-    docker run --rm --net host exaspace/rabbit-python-util rabbit-send.py --help
+Simple Python utilities to send and receive messages to/from RabbitMQ using the `pika` Python library (written in Python 3). 
 
 
 Sending messages

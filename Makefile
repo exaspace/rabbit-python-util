@@ -5,7 +5,7 @@
 
 REGISTRY=  exaspace
 IMAGE    = rabbit-python-util
-VERSION  = $(shell git describe)
+VERSION  = $(shell git describe --tags)
 
 DOCKER=$(shell docker info >/dev/null 2>&1 && echo "docker" || echo "sudo docker")
 
@@ -16,7 +16,3 @@ build:
 
 latest: build
 	$(DOCKER) tag $(REGISTRY)/$(IMAGE):$(VERSION) $(REGISTRY)/$(IMAGE):latest
-
-push:
-	$(DOCKER) push $(REGISTRY)/$(IMAGE):$(VERSION)
-	$(DOCKER) push $(REGISTRY)/$(IMAGE):latest
