@@ -28,9 +28,9 @@ Start a local RabbitMQ server (admin site will be accessible at `http://localhos
 
     docker compose up -d
 
-Sending messages every second to a durable exchange called 'testexchange')
+Sending 100 messages at a rate of one per second to a new durable exchange called 'testexchange':
 
-    ./rabbit-send.py  --exchange testexchange --message "hello @COUNT@" --delay_ms 1000 --declare --durable --count 1000
+    ./rabbit-send.py  --exchange testexchange --message "yo @COUNT@" --delay_ms 1000 --declare --durable --count 100
 
 In another window, start consuming from 'testexchange':
 
@@ -120,12 +120,12 @@ Note that if the magic string "@COUNT@" occurs in your message body, it will be 
 
 
 
-Running a local RabbitMQ server
-===============================
+Tips on running and administering a local RabbitMQ server
+=========================================================
 
-Either run `docker compose up -d` in this project's directory. 
+Run `docker compose up -d` in this project's directory to start a rabbit server.
 
-The RabbitMQ UI is available at `http://localhost:15672/`.
+The RabbitMQ Admin UI is available at `http://localhost:15672/`.
 
 To list exchanges and queues (you'll have none initially) you can run the `rabbitmqctl` tool inside the container:
 
